@@ -1,0 +1,113 @@
+datasource db {
+  url      = env("DATABASE_URL")
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  //user info
+  firstName String
+  lastName String?
+  email String @unique
+  tel String
+  address String
+
+  //credentials
+  username String @unique
+  password String
+
+  orders Order[] // o2m relation
+}
+
+
+model Order {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  pizzas SelectedPizza[] // o2m relation
+  additives Additive[] // m2m relation
+
+  userId Int
+  user User @relation(fields: [userId], references: [id]) // m2o relation
+}
+
+//additional products for order
+model Additive {
+  id Int @id @default(autoincrement())
+
+  image String
+  name String
+  price Decimal @db.Money
+
+  orders Order[] // m2m relation
+}
+
+model SelectedPizza {
+  id Int @id @default(autoincrement())
+
+  type String
+  name String
+  image String
+  dough String
+  size Int
+  weight Int
+  price Decimal @db.Money
+
+  ingredients Ingredient[] // m2m relation
+  addons Addon[] // m2m relation
+
+  orderId Int
+  order Order @relation(fields: [orderId], references: [id]) // m2o relation
+}
+
+model Pizza {
+  id Int @id @default(autoincrement())
+
+  type String
+  name String @unique
+
+  variants Variant[] // o2m relation
+  ingredients Ingredient[] // m2m relation
+  addons Addon[] // m2m relation
+}
+
+model Variant {
+  id Int @id @default(autoincrement())
+
+  image String
+  dough String
+  size Int
+  weight Int
+  price Decimal @db.Money
+
+  pizzaId Int
+  pizza Pizza @relation(fields: [pizzaId], references: [id]) // m2o relation
+}
+
+model Ingredient {
+  id Int @id @default(autoincrement())
+
+  name String
+  required Boolean
+
+  pizzas Pizza[] // m2m relation 
+  selectedPizzas SelectedPizza[] // m2m relation
+}
+
+//additional products for pizza
+model Addon {
+  id Int @id @default(autoincrement())
+
+  image String
+  name String 
+  price Decimal @db.Money
+  pizzas Pizza[] // m2m relation
+  selectedPizzas SelectedPizza[] // m2m relation
+}
