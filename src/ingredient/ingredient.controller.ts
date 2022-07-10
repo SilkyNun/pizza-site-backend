@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { IngredientService } from './ingredient.service';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { UpdateIngredientDto } from './dto/update-ingredient.dto';
@@ -24,19 +24,19 @@ export class IngredientController {
 
   @Get(':id')
   @ApiOkResponse({type: IngredientEntity})
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.ingredientService.findOne(+id);
   }
 
   @Patch(':id')
   @ApiOkResponse({type: IngredientEntity})
-  update(@Param('id') id: string, @Body() updateIngredientDto: UpdateIngredientDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateIngredientDto: UpdateIngredientDto) {
     return this.ingredientService.update(+id, updateIngredientDto);
   }
 
   @Delete(':id')
   @ApiOkResponse({type: IngredientEntity})
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.ingredientService.remove(+id);
   }
 }
