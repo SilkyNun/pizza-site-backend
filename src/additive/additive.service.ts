@@ -1,26 +1,72 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Additive } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAdditiveDto } from './dto/create-additive.dto';
 import { UpdateAdditiveDto } from './dto/update-additive.dto';
+import { AdditiveNotFoundException } from './exceptions/additive-not-fount.exception';
 
 @Injectable()
 export class AdditiveService {
-  create(createAdditiveDto: CreateAdditiveDto) {
-    return 'This action adds a new additive';
+
+  constructor(
+    private prisma: PrismaService
+  ) {}
+
+  create(createAdditiveDto: CreateAdditiveDto): Promise<Additive> {
+    return this.prisma.additive.create({
+      data: {...createAdditiveDto}
+    });
   }
 
-  findAll() {
-    return `This action returns all additive`;
+  findAll(): Promise<Additive[]> {
+    return this.prisma.additive.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} additive`;
+  async findOne(id: number): Promise<Additive> {
+    const additive: Additive = await this.prisma.additive.findUnique({
+      where: {id}
+    });
+
+    if (additive) {
+      return additive;
+    }
+
+    throw new AdditiveNotFoundException(id);
   }
 
-  update(id: number, updateAdditiveDto: UpdateAdditiveDto) {
-    return `This action updates a #${id} additive`;
+  async update(id: number, updateAdditiveDto: UpdateAdditiveDto): Promise<Additive> {
+    try {
+      const updatedAdditive: Additive = await this.prisma.additive.update({
+        where: {id},
+        data: {...updateAdditiveDto}
+      });
+
+      return updatedAdditive;
+    } catch(e) {
+      if (e instanceof PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new AdditiveNotFoundException(id);
+        }
+      }
+    }
+
+    throw new HttpException('Unknown exception into AdditiveService[update]', HttpStatus.BAD_REQUEST);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} additive`;
+  async remove(id: number): Promise<Additive> {
+    try {
+      return await this.prisma.additive.delete({
+        where: {id}
+      });
+    } catch(e) {
+      if (e instanceof PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new AdditiveNotFoundException(id);
+        }
+      }
+    }
+
+    throw new HttpException('Unknown exception into AdditiveService[remove]', HttpStatus.BAD_REQUEST);
   }
 }

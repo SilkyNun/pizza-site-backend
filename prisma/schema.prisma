@@ -43,7 +43,7 @@ model Additive {
   id Int @id @default(autoincrement())
 
   image String
-  name String
+  name String 
   price Decimal @db.Money
 
   orders Order[] // m2m relation
