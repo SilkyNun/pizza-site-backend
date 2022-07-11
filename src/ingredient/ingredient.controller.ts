@@ -10,12 +10,6 @@ import { IngredientEntity } from './entities/ingredient.entity';
 export class IngredientController {
   constructor(private readonly ingredientService: IngredientService) {}
 
-  @Post()
-  @ApiCreatedResponse({type: IngredientEntity})
-  create(@Body() createIngredientDto: CreateIngredientDto) {
-    return this.ingredientService.create(createIngredientDto);
-  }
-
   @Get()
   @ApiOkResponse({type: [IngredientEntity]})
   findAll() {
@@ -28,11 +22,7 @@ export class IngredientController {
     return this.ingredientService.findOne(+id);
   }
 
-  @Patch(':id')
-  @ApiOkResponse({type: IngredientEntity})
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateIngredientDto: UpdateIngredientDto) {
-    return this.ingredientService.update(+id, updateIngredientDto);
-  }
+
 
   @Delete(':id')
   @ApiOkResponse({type: IngredientEntity})

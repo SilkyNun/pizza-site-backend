@@ -13,10 +13,11 @@ export class IngredientService {
     private prisma: PrismaService
   ) {}
 
-  create(createIngredientDto: CreateIngredientDto): Promise<Ingredient> {
+  create(createIngredientDto: CreateIngredientDto, pizzaId: number): Promise<Ingredient> {
     return this.prisma.ingredient.create({
       data: {
-        ...createIngredientDto
+        ...createIngredientDto,
+        pizzaId
       }
     });
   }

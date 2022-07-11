@@ -4,6 +4,7 @@ import { AddonController } from './addon.controller';
 
 @Module({
   controllers: [AddonController],
-  providers: [AddonService]
+  providers: [AddonService],
+  exports: [AddonService]
 })
 export class AddonModule {}

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Variant } from '@prisma/client';
+import { Prisma, PrismaPromise, Variant } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateVariantDto } from './dto/create-variant.dto';
 import { UpdateVariantDto } from './dto/update-variant.dto';
@@ -15,6 +15,23 @@ export class VariantService {
     return this.prisma.variant.create({
       data: {pizzaId, ...createVariantDto}
     })
+  }
+
+  createMany(createVariantDtos: CreateVariantDto[], pizzaId: number): PrismaPromise<Prisma.BatchPayload> {
+    let variants: Prisma.VariantCreateManyInput[] = [];
+
+    createVariantDtos.forEach(dto => {
+      let variantInput: Prisma.VariantCreateManyInput = {
+        ...dto,
+        pizzaId
+      };
+      variants.push(variantInput);
+    })
+
+    return this.prisma.variant.createMany({      
+      data: variants
+    });
+
   }
 
   findAllRelated(pizzaId: number): Promise<Variant[]> {

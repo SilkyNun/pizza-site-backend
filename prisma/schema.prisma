@@ -74,7 +74,7 @@ model Pizza {
   name String @unique
 
   variants Variant[] // o2m relation
-  ingredients Ingredient[] // m2m relation
+  ingredients Ingredient[] // o2m relation
   addons Addon[] // m2m relation
 }
 
@@ -88,16 +88,17 @@ model Variant {
   price Decimal @db.Money
 
   pizzaId Int
-  pizza Pizza @relation(fields: [pizzaId], references: [id]) // m2o relation
+  pizza Pizza @relation(fields: [pizzaId], references: [id], onDelete: Cascade, onUpdate: Cascade) // m2o relation
 }
 
 model Ingredient {
   id Int @id @default(autoincrement())
 
-  name String
+  name String 
   required Boolean
 
-  pizzas Pizza[] // m2m relation 
+  pizzaId Int
+  pizza Pizza @relation(fields: [pizzaId], references: [id], onDelete: Cascade, onUpdate: Cascade) // m2o relation
   selectedPizzas SelectedPizza[] // m2m relation
 }
 
@@ -106,7 +107,7 @@ model Addon {
   id Int @id @default(autoincrement())
 
   image String
-  name String 
+  name String @unique
   price Decimal @db.Money
   pizzas Pizza[] // m2m relation
   selectedPizzas SelectedPizza[] // m2m relation

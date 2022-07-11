@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Addon, PrismaClient } from '@prisma/client';
+import { Addon, Prisma, PrismaClient, PrismaPromise } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAddonDto } from './dto/create-addon.dto';
@@ -17,6 +17,37 @@ export class AddonService {
     return this.prisma.addon.create({
       data: {...createAddonDto}
     });
+  }
+
+  createOrConnect(createAddonDtos: CreateAddonDto[], pizzaId: number): Promise<Addon[]> {
+    let addons: Prisma.AddonUpsertArgs[] = [];
+
+    createAddonDtos.forEach(dto => {
+      let addon: Prisma.AddonUpsertArgs = {
+        where: {
+          name: dto.name
+        },
+        create: {
+          pizzas: {
+            connect: {
+              id: pizzaId
+            }
+          },
+          ...dto
+        },
+        update: {
+          pizzas: {
+            connect: {
+              id: pizzaId
+            }
+          }
+        }
+      }
+      addons.push(addon);
+    })
+
+    let upsertStack = addons.map(addon => this.prisma.addon.upsert(addon));
+    return this.prisma.$transaction(upsertStack);
   }
 
   findAll(): Promise<Addon[]> {
