@@ -8,10 +8,23 @@ import { AdditiveModule } from './additive/additive.module';
 import { OrderModule } from './order/order.module';
 import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './guards';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [PizzaModule, VariantModule, IngredientModule, AddonModule, SelectedPizzaModule, AdditiveModule, OrderModule, UserModule, PrismaModule],
+  imports: [PizzaModule, VariantModule, IngredientModule, AddonModule, SelectedPizzaModule, AdditiveModule, OrderModule, UserModule, PrismaModule, AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    })
+  ],
   controllers: [],
-  providers: [],
+  providers: [
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard
+    // }
+  ],
 })
 export class AppModule {}

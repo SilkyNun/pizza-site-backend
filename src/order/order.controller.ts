@@ -1,34 +1,39 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, ParseIntPipe } from '@nestjs/common';
 import { OrderService } from './order.service';
+import { User } from 'src/decorators';
+import { JwtAuthGuard } from 'src/guards';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { OrderEntity } from './entities/order.entity';
+import { ParameterObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
 @Controller('order')
+@ApiTags('Order controller')
+@UseGuards(JwtAuthGuard)
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
+  @ApiCreatedResponse({type: OrderEntity})
+  create(@Body() createOrderDto: CreateOrderDto, @User() user) {
+    return this.orderService.create(createOrderDto, user.id);
   }
 
   @Get()
-  findAll() {
-    return this.orderService.findAll();
+  @ApiOkResponse({type: [OrderEntity]})
+  findAllRelated(@User() user) {
+    return this.orderService.findAllRelated(user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(+id, updateOrderDto);
+  @ApiOkResponse({type: OrderEntity})
+  findOne(@Param('id', ParseIntPipe) id: number, @User() user) {
+    return this.orderService.findOneRelated(id, user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderService.remove(+id);
+  @ApiOkResponse({type: OrderEntity})
+  remove(@Param('id', ParseIntPipe) id: number, @User() user) {
+    return this.orderService.remove(id, user.id);
   }
 }

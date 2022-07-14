@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { hash } from 'bcrypt';
 import { UniqueConstraintExeption } from 'src/exceptions';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,13 +24,18 @@ export class UserService {
     email: true,
     tel: true,
     address: true,
-    username: true
+    username: true,
+    password: true
   };
 
   async create(createUserDto: CreateUserDto): Promise<Prisma.UserSelect> {
     try {
+      const passwordHash = await hash(createUserDto.password, parseInt(process.env.BCRYPT_SALT_ROUNDS));
       const user = await this.prisma.user.create({
-        data: {...createUserDto},
+        data: {
+          ...createUserDto,
+          password: passwordHash,
+        },
         select: this.selectedOption
       });
 
@@ -41,6 +47,7 @@ export class UserService {
           throw new UniqueConstraintExeption();
         }
       }
+      console.log(e);
     }
 
     throw new HttpException('Unknown exception in UserService[create]', HttpStatus.BAD_REQUEST);
@@ -65,8 +72,17 @@ export class UserService {
     throw new UserNotFoundException(id);
   }
 
+  findOneByUsername(username: string): Promise<User> {
+    return this.prisma.user.findUnique({
+      where: {username}
+    });
+  }
+
   async update(id: number, updateUserDto: UpdateUserDto): Promise<Prisma.UserSelect> {
     try {
+      if (updateUserDto.password) {
+        updateUserDto.password = await hash(updateUserDto.password, parseInt(process.env.BCRYPT_SALT_ROUNDS));
+      }
       const user = await this.prisma.user.update({
         where: {id},
         data: {...updateUserDto},
