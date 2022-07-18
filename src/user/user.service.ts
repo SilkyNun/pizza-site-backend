@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, Role, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { hash } from 'bcrypt';
+import { Roles } from 'src/decorators';
 import { UniqueConstraintExeption } from 'src/exceptions';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -25,7 +26,8 @@ export class UserService {
     tel: true,
     address: true,
     username: true,
-    password: true
+    password: true,
+    roles: true
   };
 
   async create(createUserDto: CreateUserDto): Promise<Prisma.UserSelect> {
@@ -47,7 +49,6 @@ export class UserService {
           throw new UniqueConstraintExeption();
         }
       }
-      console.log(e);
     }
 
     throw new HttpException('Unknown exception in UserService[create]', HttpStatus.BAD_REQUEST);

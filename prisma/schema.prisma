@@ -7,6 +7,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
+
 model User {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -18,6 +24,7 @@ model User {
   email String @unique
   tel String
   address String
+  roles Role[] @default([USER])
 
   //credentials
   username String @unique
@@ -35,7 +42,7 @@ model Order {
   additives Additive[] // m2m relation
 
   userId Int
-  user User @relation(fields: [userId], references: [id]) // m2o relation
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade) // m2o relation
 }
 
 //additional products for order
