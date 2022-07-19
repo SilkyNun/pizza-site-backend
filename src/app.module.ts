@@ -20,11 +20,6 @@ import { ConfigModule } from '@nestjs/config';
     })
   ],
   controllers: [],
-  providers: [
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: JwtAuthGuard
-    // }
-  ],
+  providers: [],
 })
 export class AppModule {}
