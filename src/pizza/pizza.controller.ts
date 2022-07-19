@@ -1,12 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Put, Query } from '@nestjs/common';
 import { PizzaService } from './pizza.service';
 import { CreatePizzaDto } from './dto/create-pizza.dto';
 import { UpdatePizzaDto } from './dto/update-pizza.dto';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { PizzaEntity } from './entities/pizza.entity';
 import { JwtAuthGuard, RolesGuard } from 'src/guards';
 import { Public, Roles } from 'src/decorators';
-import { Role } from '@prisma/client';
+import { Pizza, Role } from '@prisma/client';
+import { QueryParams } from './dto/query-params.dto';
 
 @Controller('pizza')
 @ApiTags('Pizza controller')
@@ -26,8 +27,8 @@ export class PizzaController {
   @Get()
   @Public()
   @ApiOkResponse({type: [PizzaEntity]})
-  findAll() {
-    return this.pizzaService.findAll();
+  findAll(@Query() params: QueryParams) {
+    return this.pizzaService.findAll(params);
   }
 
   @Get(':id')

@@ -11,6 +11,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateVariantDto } from 'src/variant/dto/create-variant.dto';
 import { VariantService } from 'src/variant/variant.service';
 import { CreatePizzaDto } from './dto/create-pizza.dto';
+import { QueryParams } from './dto/query-params.dto';
 import { UpdatePizzaDto } from './dto/update-pizza.dto';
 import { PizzaNotFoundException } from './exceptions/pizza-not-found.exception';
 
@@ -62,12 +63,38 @@ export class PizzaService {
     return createdPizza;
   }
 
-  findAll(): Promise<Pizza[]> {
+  findAll(params: QueryParams): Promise<Pizza[]> {
+    let skip: number;
+    let take: number;
+    let search: string = params.search? params.search : '';
+    if (params._limit && params._page) {
+      skip = Number(params._limit) * Number(params._page) - Number(params._limit);
+      take = Number(params._limit);
+    }
     return this.prisma.pizza.findMany({
+      skip,
+      take,
       include: {
         variants: true,
         ingredients: true,
         addons: true
+      },
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search
+            }
+          },
+          {
+            type: {
+              contains: search
+            }
+          }
+        ]
+      },
+      orderBy: {
+        name: 'asc',
       }
     });
   }
