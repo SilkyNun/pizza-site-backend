@@ -37,4 +37,6 @@ export class CreateUserDto {
     @IsEnum(Role, {each: true})
     @ApiProperty({enum: Role, description: 'Roles of user', example: [Role.USER, Role.ADMIN]})
     roles?: Role[]
+
+    refreshToken?: string;
 }

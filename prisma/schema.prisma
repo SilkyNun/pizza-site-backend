@@ -30,6 +30,9 @@ model User {
   username String @unique
   password String
 
+  //tokens
+  refreshToken String?
+
   orders Order[] // o2m relation
 }
 
